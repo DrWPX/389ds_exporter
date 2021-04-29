@@ -13,7 +13,6 @@ require (
 	github.com/prometheus/common v0.0.0-20181020173914-7e9e6cabbd39
 	github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d // indirect
 	github.com/sirupsen/logrus v1.2.1-0.20181103062819-44067abb194b
-	github.com/terrycain/389ds_exporter v0.1.2
 	gopkg.in/asn1-ber.v1 v1.0.0-20170511165959-379148ca0225 // indirect
 	gopkg.in/ldap.v2 v2.5.1
 )
