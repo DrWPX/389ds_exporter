@@ -16,6 +16,8 @@ jobs:
       run: go build -o 389ds_exporter -v .
     - name: Release binary
       uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: |
           389ds_exporter
