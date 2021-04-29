@@ -1,15 +1,23 @@
 name: Build & deploy release
 
-on: release
+on:
+  push:
+    tags:
+    - v*
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Compile and release artifact
-      uses: ngs/go-release.action@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GOARCH: amd64
-        GOOS: linux
-        EXTRA_FILES: "README.md LICENSE"
+    - uses: actions/setup-go@v2
+      with:
+        go-version: 1.16.x
+    - name: Build project
+      run: go build -v -o 389ds_exporter ./...
+    - name: Release binary
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          389ds_exporter
+          LICENSE
+          README.md
