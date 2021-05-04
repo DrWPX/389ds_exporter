@@ -85,7 +85,7 @@ var (
 			Name:      "replication_status",
 			Help:      "Replication status by server",
 		},
-		[]string{"server"},
+		[]string{"destination"},
 	)
 	scrapeCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
