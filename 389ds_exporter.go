@@ -12,32 +12,41 @@ import (
 )
 
 var (
-	listenPort  = flag.String("web.listen-address", ":9496", "Bind address for prometheus HTTP metrics server")
-	metricsPath = flag.String("web.telemetry-path", "/metrics", "Path to expose metrics on")
+	interval    = flag.Duration("interval", 60*time.Second, "Scrape interval")
+	ipaDomain   = flag.String("ipa-domain", "", "FreeIPA domain e.g. example.org")
 	ldapAddr    = flag.String("ldap.addr", "localhost:389", "Address of 389ds server")
 	ldapUser    = flag.String("ldap.user", "cn=Directory Manager", "389ds Directory Manager user")
 	ldapPass    = flag.String("ldap.pass", "", "389ds Directory Manager password")
-	ipaDomain   = flag.String("ipa-domain", "", "FreeIPA domain e.g. example.org")
-	interval    = flag.Duration("interval", 60*time.Second, "Scrape interval")
-	debug       = flag.Bool("debug", false, "Debug logging")
-	jsonFormat  = flag.Bool("log-json", false, "JSON formatted log messages")
+	logLevel    = flag.String("log.level", "info", "Log level")
+	logFormat   = flag.String("log.format", "default", "Log format (default, json)")
+	listenPort  = flag.String("web.listen-address", ":9496", "Bind address for prometheus HTTP metrics server")
+	metricsPath = flag.String("web.telemetry-path", "/metrics", "Path to expose metrics on")
+	showVersion = flag.Bool("version", false, "Exporter version")
 )
 
 func main() {
 	flag.Parse()
 
-	if *debug {
-		log.SetLevel(log.DebugLevel)
+	if level, err := log.ParseLevel(*logLevel); err != nil {
+		log.Fatalf("log.level must be one of %v", log.AllLevels)
+	} else {
+		log.SetLevel(level)
 	}
-	if *jsonFormat {
+
+	switch *logFormat {
+	case "default":
+		log.SetFormatter(&log.TextFormatter{})
+	case "json":
 		log.SetFormatter(&log.JSONFormatter{})
+	default:
+		log.Fatal("log.level must be one of [default json]")
 	}
 
 	if *ldapPass == "" {
-		log.Fatal("ldapPass cannot be empty")
+		log.Fatal("ldap.pass cannot be empty")
 	}
 	if *ipaDomain == "" {
-		log.Fatal("ipaDomain cannot be empty")
+		log.Fatal("ipa-domain cannot be empty")
 	}
 
 	log.Info("Starting prometheus HTTP metrics server on ", *listenPort)
