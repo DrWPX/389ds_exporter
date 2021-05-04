@@ -13,7 +13,10 @@ jobs:
       with:
         go-version: 1.16.x
     - name: Build project
-      run: go build -o 389ds_exporter -v .
+      run: |
+        go build \
+          -ldflags "-X github.com/prometheus/common/version.Version=${GITHUB_REF#refs/*/} -X github.com/prometheus/common/version.Branch=master -X github.com/prometheus/common/version.Revision=${{github.sha}} -X github.com/prometheus/common/version.BuildUser=github-action -X github.com/prometheus/common/version.BuildDate=$(date +'%Y%M%d-%H:%M:%S')" \
+          -o 389ds_exporter -v .
     - name: Release binary
       uses: softprops/action-gh-release@v1
       env:
