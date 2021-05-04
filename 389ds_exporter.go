@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -26,6 +27,11 @@ var (
 
 func main() {
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Println(version.Print("Version"))
+		return
+	}
 
 	if level, err := log.ParseLevel(*logLevel); err != nil {
 		log.Fatalf("log.level must be one of %v", log.AllLevels)

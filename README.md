@@ -28,6 +28,7 @@ To run:
 * __`-ldap.user`:__ 389ds Directory Manager user (default "cn=Directory Manager")
 * __`-log.format`:__ Log format (default or json)
 * __`-log.level`:__ Log level
+* __`version`:__ Show exporter version
 * __`-web.listen-address`:__ Bind address for prometheus HTTP metrics server (default ":9496")
 * __`-web.telemetry-path`:__ Path to expose metrics on (default "/metrics")
 
@@ -46,7 +47,6 @@ To run:
 | ldap_389ds_replication_status | Replication status of peered 389ds nodes (1 good, 0 bad) | server |
 | ldap_389ds_scrape_count | Number of successful or unsuccessful scrapes | result |
 | ldap_389ds_scrape_duration_seconds | How long the last scrape took |
-
 
 ### Credits
 
