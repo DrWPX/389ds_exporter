@@ -105,6 +105,10 @@ var (
 	)
 )
 
+var (
+	lastReplicaHostStatus = map[string]struct{}{}
+)
+
 func init() {
 	prometheus.MustRegister(
 		usersGauge,
@@ -282,11 +286,11 @@ func ldapCountQuery(l *ldap.Conn, baseDN, searchFilter, attr string, scope int) 
 }
 
 func ldapReplicationQuery(l *ldap.Conn, suffix string) error {
-	escaped_suffix := ldap_escaper.Replace(suffix)
-	base_dn := fmt.Sprintf("cn=replica,cn=%s,cn=mapping tree,cn=config", escaped_suffix)
+	escapedSuffix := ldap_escaper.Replace(suffix)
+	baseDn := fmt.Sprintf("cn=replica,cn=%s,cn=mapping tree,cn=config", escapedSuffix)
 
 	req := ldap.NewSearchRequest(
-		base_dn, ldap.ScopeSingleLevel, ldap.NeverDerefAliases, 0, 0, false,
+		baseDn, ldap.ScopeSingleLevel, ldap.NeverDerefAliases, 0, 0, false,
 		"(objectClass=nsds5replicationagreement)", []string{"nsDS5ReplicaHost", "nsds5replicaLastUpdateStatus"}, nil,
 	)
 	sr, err := l.Search(req)
@@ -294,9 +298,11 @@ func ldapReplicationQuery(l *ldap.Conn, suffix string) error {
 		return err
 	}
 
+	currentReplicaHostStatus := map[string]struct{}{}
 	for _, entry := range sr.Entries {
 		host := entry.GetAttributeValue("nsDS5ReplicaHost")
 		status := entry.GetAttributeValue("nsds5replicaLastUpdateStatus")
+
 		if strings.Contains(status, "Incremental update succeeded") { // Error (0) Replica acquired successfully: Incremental update succeeded
 			replicationStatusGauge.WithLabelValues(host).Set(1)
 		} else if strings.Contains(status, "Problem connecting to replica") { // Error (-1) Problem connecting to replica - LDAP error: Can't contact LDAP server (connection error)
@@ -308,7 +314,17 @@ func ldapReplicationQuery(l *ldap.Conn, suffix string) error {
 			log.Warnf("Unknown replication status host: %s, status: %s", host, status)
 			replicationStatusGauge.WithLabelValues(host).Set(0)
 		}
+
+		currentReplicaHostStatus[host] = struct{}{}
+		delete(lastReplicaHostStatus, host)
 	}
 
+	// NOTE: reset replicationStatusGauge when we lost a replication agreement
+	for host := range lastReplicaHostStatus {
+		log.Warnf("Replication status lost for host '%s'", host)
+		replicationStatusGauge.WithLabelValues(host).Set(0)
+	}
+
+	lastReplicaHostStatus = currentReplicaHostStatus
 	return nil
 }
