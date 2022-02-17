@@ -14,6 +14,7 @@ import (
 
 var (
 	interval    = flag.Duration("interval", 60*time.Second, "Scrape interval")
+	ipaDns      = flag.Bool("ipa-dns", true, "Should we scrape DNS stats?")
 	ipaDomain   = flag.String("ipa-domain", "", "FreeIPA domain e.g. example.org")
 	ldapAddr    = flag.String("ldap.addr", "localhost:389", "Address of 389ds server")
 	ldapUser    = flag.String("ldap.user", "cn=Directory Manager", "389ds Directory Manager user")
@@ -61,7 +62,7 @@ func main() {
 	log.Info("Starting 389ds scraper for ", *ldapAddr)
 	for range time.Tick(*interval) {
 		log.Debug("Starting metrics scrape")
-		exporter.ScrapeMetrics(*ldapAddr, *ldapUser, *ldapPass, *ipaDomain)
+		exporter.ScrapeMetrics(*ldapAddr, *ldapUser, *ldapPass, *ipaDomain, *ipaDns)
 	}
 }
 
