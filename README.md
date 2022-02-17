@@ -22,6 +22,7 @@ To run:
 ```
 
 * __`-interval`:__ Scrape interval (default 1m0s)
+* __`-ipa-dns`:__ Should we scrape DNS stats? (default true)
 * __`-ipa-domain`:__ FreeIPA domain e.g. example.org
 * __`-ldap.addr`:__ Address of 389ds server (default "localhost:389")
 * __`-ldap.pass`:__ 389ds Directory Manager password
